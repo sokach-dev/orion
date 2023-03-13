@@ -16,7 +16,7 @@ pub struct OpenAIRequest {
     /// ID of the model to use. Currently, only gpt-3.5-turbo and gpt-3.5-turbo-0301 are supported.
     pub model: String,
 
-    pub message: Vec<Message>,
+    pub messages: Vec<Message>,
 
     /// What sampling temperature to use, between 0 and 2.
     /// Higher values like 0.8 will make the output more random,
@@ -178,7 +178,7 @@ mod tests {
     fn builder_should_work() {
         let req = OpenAIRequestBuilder::default()
             .model("gpt-3.5-turbo".to_string())
-            .message(vec![MessageBuilder::default()
+            .messages(vec![MessageBuilder::default()
                 .role("system".to_string())
                 .content("prompt".to_string())
                 .build()
@@ -190,7 +190,7 @@ mod tests {
         let s = serde_json::to_string(&req).unwrap();
         assert_eq!(
             s,
-            r#"{"model":"gpt-3.5-turbo","message":[{"role":"system","content":"prompt"}],"temperature":0.2}"#
+            r#"{"model":"gpt-3.5-turbo","messages":[{"role":"system","content":"prompt"}],"temperature":0.2}"#
         );
     }
 
@@ -207,7 +207,7 @@ mod tests {
 
         let x = response
             .parse_content::<ParseResult, _>(|s| {
-                let re = regex::Regex::new(r"^(?P<s>.*)\n\n(?P<n>(.|\s)+)$").unwrap();
+                let re = regex::Regex::new(r"^(?P<s>.*)(\n)+(?P<n>(.|\s)+)$").unwrap();
                 let caps = re.captures(&s).ok_or(anyhow::anyhow!("no match"))?;
                 Ok(ParseResult {
                     s: caps.name("s").unwrap().as_str().into(),
