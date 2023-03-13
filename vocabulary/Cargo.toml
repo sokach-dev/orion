@@ -1,0 +1,18 @@
+[package]
+name = "vocabulary"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+abi = { version = "0.1.0", path = "../abi" }
+anyhow = "1.0.69"
+clap = { version = "4.1.8", features = ["derive"] }
+openai = { version = "0.1.0", path = "../openai" }
+regex = "1.7.1"
+service = { version = "0.1.0", path = "../service" }
+time = { version = "0.3.20", features = ["macros"] }
+tokio = { version = "1.26.0", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.16", features = ["local-time", "env-filter"] }

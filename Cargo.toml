@@ -1,6 +1,8 @@
 [workspace]
 members = [
-"abi",
-"service",
-"tui",
+    "abi",
+    "service",
+    "tui",
+    "vocabulary",
+    "openai",
 ]

@@ -1,14 +1,15 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+mod vocabulary;
+
+use async_trait::async_trait;
+use sqlx::PgPool;
+
+#[derive(Debug)]
+pub struct OrionService {
+    pool: PgPool,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[async_trait]
+pub trait VocabularyTrait {
+    /// make a vocabulary
+    async fn add_vocabulary(&self, v: abi::Vocabulary) -> Result<abi::Vocabulary, abi::Error>;
 }
