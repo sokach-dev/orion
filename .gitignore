@@ -1,3 +1,4 @@
 /target
 app.toml
 fixtures.sh
+vocabulary/data/two_list.txt

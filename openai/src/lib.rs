@@ -22,6 +22,7 @@ pub async fn get_from_openai(
         .default_headers(headers)
         .build()?;
 
+    tracing::debug!("will request: {}", url);
     let response = client
         .post(url)
         .json(request)
