@@ -23,13 +23,12 @@ pub async fn get_from_openai(
         .build()?;
 
     tracing::debug!("will request: {}", url);
-    let response = client
-        .post(url)
-        .json(request)
-        .send()
-        .await?
-        .json::<openai::OpenAIResponse>()
-        .await?;
+    let response_body = client.post(url).json(request).send().await?;
+
+    let response_str = response_body.text().await?;
+    tracing::debug!("response: {}", response_str);
+
+    let response: OpenAIResponse = serde_json::from_str(&response_str)?;
 
     Ok(response)
 }
