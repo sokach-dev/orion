@@ -80,7 +80,7 @@ async fn main() {
 
             let db_config = abi::DbConfig { database_url: db };
 
-            openai::add_word_to_db(db_config, &key, &url, word_list, &prompt)
+            openai::add_word_from_file(db_config, &key, &url, word_list, &prompt)
                 .await
                 .unwrap();
         }
