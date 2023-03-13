@@ -38,6 +38,7 @@ async fn add_word_to_db(
         let re = Regex::new(
             r#"单词：(?P<word>.+)(\n)+英式音标：(?P<soundmark>.+)(\n)+词根词缀：(?P<roots>.+)(\n)+中文释义：(?P<paraphrase>.+)(\n)+常用搭配：(?P<collocations>.+)(\n)+近义词：(?P<synonyms>.+)(\n)+例句：(?P<examples>(.|\s)+)"#,
         )?;
+        let content = content.trim();
         let caps = re.captures(&content).ok_or(anyhow!("openai no match content: {}", &content))?;
 
         Ok(abi::Vocabulary {
