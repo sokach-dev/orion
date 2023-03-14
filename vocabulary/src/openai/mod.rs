@@ -77,11 +77,21 @@ pub async fn add_word_from_file(
         .map(|s| s.into())
         .collect::<Vec<String>>();
 
-    let (s, r) = bounded(30);
+    let (s, r) = bounded(40);
 
     let wg = WaitGroup::new();
 
     for w in word_list {
+        // check this word is exist in db
+        let q = abi::VocabularyQueryBuilder::default()
+            .word(w.clone())
+            .build()
+            .unwrap();
+        if db.get_vocabulary(q).await?.len() > 0 {
+            tracing::warn!("word: {} is exist in db", w);
+            continue;
+        }
+
         if s.send(None).is_ok() {
             let wg = wg.clone();
             let rr = r.clone();
