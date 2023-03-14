@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS orion.vocabulary (
     collocations TEXT, -- 常用搭配
     synonyms TEXT, -- 同义词
     examples TEXT, -- 例句
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX orion_word_idx ON orion.vocabulary (word);
+CREATE UNIQUE INDEX orion_word_idx ON orion.vocabulary (word);

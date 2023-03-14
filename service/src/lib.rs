@@ -12,4 +12,10 @@ pub struct OrionService {
 pub trait VocabularyTrait {
     /// make a vocabulary
     async fn add_vocabulary(&self, v: abi::Vocabulary) -> Result<abi::Vocabulary, abi::Error>;
+
+    /// get a vocabulary
+    async fn get_vocabulary(
+        &self,
+        q: abi::VocabularyQuery,
+    ) -> Result<Vec<abi::Vocabulary>, abi::Error>;
 }

@@ -77,7 +77,7 @@ pub async fn add_word_from_file(
         .map(|s| s.into())
         .collect::<Vec<String>>();
 
-    let (s, r) = bounded(20);
+    let (s, r) = bounded(30);
 
     let wg = WaitGroup::new();
 
