@@ -1,6 +1,7 @@
 use anyhow::anyhow;
 use crossbeam_channel::{bounded, Receiver};
 use crossbeam_utils::sync::WaitGroup;
+use defer_lite::defer;
 use regex::Regex;
 use service::{OrionService, VocabularyTrait};
 use std::fs;
@@ -14,6 +15,9 @@ async fn add_word_to_db(
     key: String,
     prompt: String,
 ) -> Result<abi::Vocabulary, abi::Error> {
+    defer! {
+        _ = r.recv();
+    }
     let request = openai::OpenAIRequestBuilder::default()
         .model("gpt-3.5-turbo".to_string())
         .temperature(0.2)
@@ -56,7 +60,6 @@ async fn add_word_to_db(
     })?;
 
     let v = db.add_vocabulary(v).await?;
-    _ = r.recv();
     Ok(v)
 }
 
@@ -77,7 +80,9 @@ pub async fn add_word_from_file(
         .map(|s| s.into())
         .collect::<Vec<String>>();
 
-    let (s, r) = bounded(40);
+    let concurrence_num_str = std::env::var("OPENAI_CONCURRENCE_NUM").unwrap_or("2".to_string());
+    let num = concurrence_num_str.parse::<usize>().unwrap_or(2);
+    let (s, r) = bounded(num); // openai request limit 20/min
 
     let wg = WaitGroup::new();
 
@@ -100,9 +105,11 @@ pub async fn add_word_from_file(
             let prompt = prompt.to_string();
             let db = db.clone();
             tokio::spawn(async move {
-                tracing::info!("{}", w);
-                let v = add_word_to_db(rr, wg, w, db, url, key, prompt).await;
-                tracing::debug!("add new word: {:?}", v);
+                tracing::info!("will add word: {}", w);
+                match add_word_to_db(rr, wg, w.clone(), db, url, key, prompt).await {
+                    Ok(v) => tracing::info!("success add word: {:?}", v),
+                    Err(e) => tracing::error!("failed add word: {}, reason: {:?}", w, e),
+                }
             });
         }
     }

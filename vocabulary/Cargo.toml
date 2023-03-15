@@ -11,6 +11,7 @@ anyhow = "1.0.69"
 clap = { version = "4.1.8", features = ["derive"] }
 crossbeam-channel = "0.5.7"
 crossbeam-utils = "0.8.15"
+defer-lite = "1.0.0"
 openai = { version = "0.1.0", path = "../openai" }
 regex = "1.7.1"
 service = { version = "0.1.0", path = "../service" }

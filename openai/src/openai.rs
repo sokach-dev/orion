@@ -132,7 +132,7 @@ pub struct Usage {
 #[derive(Debug, Deserialize)]
 pub struct Choice {
     pub message: Message,
-    pub finish_reason: String,
+    pub finish_reason: Option<String>,
     pub index: u32,
 }
 
