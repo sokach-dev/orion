@@ -48,3 +48,28 @@ message VocabularyQuery {
     /// limit
     optional int64 limit = 9;
 }
+
+// add a new vocabulary
+message AddVocabularyRequest {
+    Vocabulary vocabulary = 1;
+}
+
+message VocabularyResponse {
+    Vocabulary vocabulary = 1;
+}
+
+message QueryVocabularyRequest {
+    VocabularyQuery query = 1;
+}
+
+message QueryVocabularyResponse {
+    repeated Vocabulary vocabulary = 1;
+}
+
+// The Vocabulary service definition.
+service VocabularyService {
+    // add a new vocabulary
+    rpc AddVocabulary(AddVocabularyRequest) returns (VocabularyResponse) {}
+    // query vocabulary
+    rpc QueryVocabulary(QueryVocabularyRequest) returns (QueryVocabularyResponse) {}
+}

@@ -2,7 +2,12 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub db: DbConfig,
+    // rpc server port
+    pub port: u16,
+    // rpc server host
+    pub host: String,
+
+    pub db_config: DbConfig,
 }
 
 #[derive(Debug, Deserialize)]

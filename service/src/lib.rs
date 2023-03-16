@@ -1,21 +1,51 @@
-mod vocabulary;
+mod rpc;
+pub mod vocabulary;
 
-use async_trait::async_trait;
+use abi::vocabulary_service_server::VocabularyServiceServer;
 use sqlx::PgPool;
 
 #[derive(Debug, Clone)]
-pub struct OrionService {
+pub struct ModelService {
     pool: PgPool,
 }
 
-#[async_trait]
-pub trait VocabularyTrait {
-    /// make a vocabulary
-    async fn add_vocabulary(&self, v: abi::Vocabulary) -> Result<abi::Vocabulary, abi::Error>;
+impl ModelService {
+    pub fn new(pool: sqlx::PgPool) -> Self {
+        Self { pool }
+    }
+    pub async fn from_config(config: &abi::DbConfig) -> Result<Self, sqlx::Error> {
+        let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(5)
+            .connect(&config.database_url)
+            .await?;
+        Ok(Self::new(pool))
+    }
+}
 
-    /// get a vocabulary
-    async fn get_vocabulary(
-        &self,
-        q: abi::VocabularyQuery,
-    ) -> Result<Vec<abi::Vocabulary>, abi::Error>;
+#[derive(Debug, Clone)]
+pub struct OrionService {
+    model: ModelService,
+}
+
+impl OrionService {
+    pub async fn from_config(config: &abi::DbConfig) -> Result<Self, sqlx::Error> {
+        Ok(Self {
+            model: ModelService::from_config(config).await?,
+        })
+    }
+}
+
+pub async fn start_server(config: &abi::Config) -> Result<(), Box<dyn std::error::Error>> {
+    let addr: std::net::SocketAddr = format!("{}:{}", config.host, config.port).parse()?;
+
+    let svc = OrionService::from_config(&config.db_config).await?;
+    let svc = VocabularyServiceServer::new(svc);
+
+    tracing::info!("Listening on {}", addr);
+
+    tonic::transport::Server::builder()
+        .add_service(svc)
+        .serve(addr)
+        .await?;
+    Ok(())
 }

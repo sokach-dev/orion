@@ -1,40 +1,40 @@
-use crate::{OrionService, VocabularyTrait};
-use async_trait::async_trait;
+use crate::ModelService;
+use sqlx::Row;
+use tonic::async_trait;
 
-impl OrionService {
-    pub fn new(pool: sqlx::PgPool) -> Self {
-        Self { pool }
-    }
-    pub async fn from_config(config: &abi::DbConfig) -> Result<Self, sqlx::Error> {
-        let pool = sqlx::postgres::PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&config.database_url)
-            .await?;
-        Ok(Self::new(pool))
-    }
+#[async_trait]
+pub trait VocabularyTrait {
+    /// make a vocabulary
+    async fn add_vocabulary(&self, v: abi::Vocabulary) -> Result<abi::Vocabulary, abi::Error>;
+
+    /// get a vocabulary
+    async fn get_vocabulary(
+        &self,
+        q: abi::VocabularyQuery,
+    ) -> Result<Vec<abi::Vocabulary>, abi::Error>;
 }
 
 #[async_trait]
-impl VocabularyTrait for OrionService {
+impl VocabularyTrait for ModelService {
     // add new vocabulary
     async fn add_vocabulary(&self, mut v: abi::Vocabulary) -> Result<abi::Vocabulary, abi::Error> {
-        let id = sqlx::query!(
+        let id: i64 = sqlx::query(
             r#"
             INSERT INTO vocabulary (word, soundmark, roots, paraphrase, collocations, synonyms, examples)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING id
-            "#,
-            v.word,
-            v.soundmark,
-            v.roots,
-            v.paraphrase,
-            v.collocations,
-            v.synonyms,
-            v.examples
+            "#
         )
+        .bind(v.word.clone())
+        .bind(v.soundmark.clone())
+        .bind(v.roots.clone())
+        .bind(v.paraphrase.clone())
+        .bind(v.collocations.clone())
+        .bind(v.synonyms.clone())
+        .bind(v.examples.clone())
         .fetch_one(&self.pool)
         .await?
-        .id;
+        .get(0);
 
         v.id = id;
         Ok(v)
@@ -69,8 +69,8 @@ mod test {
         collocations: String,
         synonyms: String,
         examples: String,
-    ) -> Result<(OrionService, abi::Vocabulary), abi::Error> {
-        let db = OrionService::new(pool.clone());
+    ) -> Result<(ModelService, abi::Vocabulary), abi::Error> {
+        let db = ModelService::new(pool.clone());
         let v = abi::Vocabulary {
             id: 0,
             word,
@@ -89,7 +89,7 @@ mod test {
 
     async fn get_apple_db(
         pool: &sqlx::PgPool,
-    ) -> Result<(OrionService, abi::Vocabulary), abi::Error> {
+    ) -> Result<(ModelService, abi::Vocabulary), abi::Error> {
         get_db(
             pool,
             "apple".into(),

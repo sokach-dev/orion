@@ -2,5 +2,6 @@
 .env
 /target
 app.toml
+rpc.toml
 fixtures.sh
 vocabulary/data/two_list.txt
