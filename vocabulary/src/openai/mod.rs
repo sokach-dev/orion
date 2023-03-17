@@ -50,7 +50,7 @@ async fn add_word_to_db(
 
     let v = response.parse_content::<abi::AddVocabularyRequest, _>(|content| {
             let re = Regex::new(
-                r#"单词：(?P<word>.+)(\n)+英式音标：(?P<soundmark>.+)(\n)+词根词缀：(?P<roots>.+)(\n)+中文释义：(?P<paraphrase>.+)(\n)+常用搭配：(?P<collocations>.+)(\n)+近义词：(?P<synonyms>.+)(\n)+例句：(?P<examples>(.|\s)+)"#,
+                r#"(单词|Word)(: |：)(?P<word>.+)(\n)+英式音标(: |：)(?P<soundmark>.+)(\n)+词根词缀(: |：)(?P<roots>.+)(\n)+中文释义(: |：)(?P<paraphrase>.+)(\n)+常用搭配(: |：)(\n)*(?P<collocations>(.|\s)+)(\n)+近义词(: |：)(?P<synonyms>.+)(\n)+例句(: |：)(?P<examples>(.|\s)+)"#,
             )?;
             let content = content.trim();
             let caps = re.captures(&content).ok_or(anyhow!("openai no match content: {}", &content))?;
@@ -167,7 +167,7 @@ mod test {
     fn match_should_work() {
         let content = "单词：apple\n英式音标：/ˈæpl/\n词根词缀：无\n中文释义：苹果\n常用搭配：an apple a day (每天一苹果)\n近义词：无\n例句：I like to eat apples for breakfast. (我喜欢在早餐时吃苹果。)";
         let re = Regex::new(
-            r#"单词：(?P<word>.+)(\n)+英式音标：(?P<phonetic>.+)(\n)+词根词缀：(?P<root>.+)(\n){1,2}中文释义：(?P<chinese>.+)(\n){1,2}常用搭配：(?P<collocation>.+)(\n){1,2}近义词：(?P<synonym>.+)(\n){1,2}例句：(?P<example>(.|\s)+)"#,
+            r#"(单词|Word)(: |：)(?P<word>.+)(\n)+英式音标(: |：)(?P<soundmark>.+)(\n)+词根词缀(: |：)(?P<roots>.+)(\n)+中文释义(: |：)(?P<paraphrase>.+)(\n)+常用搭配(: |：)(\n)*(?P<collocations>(.|\s)+)(\n)+近义词(: |：)(?P<synonyms>.+)(\n)+例句(: |：)(?P<examples>(.|\s)+)"#,
         )
         .unwrap();
         let caps = re.captures(&content).unwrap();
