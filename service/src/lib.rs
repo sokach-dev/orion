@@ -1,4 +1,5 @@
 mod rpc;
+pub mod story;
 pub mod vocabulary;
 
 use abi::vocabulary_service_server::VocabularyServiceServer;

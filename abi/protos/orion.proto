@@ -45,8 +45,40 @@ message VocabularyQuery {
     optional string synonyms = 7;
     /// 例句
     optional string examples = 8;
+    /// offset
+    optional int64 offset = 9;
     /// limit
-    optional int64 limit = 9;
+    optional int64 limit = 10;
+}
+
+message Story {
+    /// id
+    int64 id = 1;
+    /// words
+    repeated string words = 2;
+    /// content
+    string content = 3;
+    /// read count
+    int64 read_count = 4;
+    /// created at
+    google.protobuf.Timestamp created_at = 5;
+    /// updated at
+    google.protobuf.Timestamp updated_at = 6;
+}
+
+message StoryQuery {
+    /// id
+    optional int64 id = 1;
+    /// words
+    optional string words = 2;
+    /// content
+    optional string content = 3;
+    /// read count
+    optional int64 read_count = 4;
+    /// offset
+    optional int64 offset = 5;
+    /// limit
+    optional int64 limit = 6;
 }
 
 // add a new vocabulary
@@ -66,10 +98,34 @@ message QueryVocabularyResponse {
     repeated Vocabulary vocabulary = 1;
 }
 
+message QueryVocabularyRandomRequest {
+    int64 limit = 1;
+}
+
+message AddStoryRequest {
+    Story story = 1;
+}
+
+message StoryResponse {
+    Story story = 1;
+}
+
+message QueryStoryResponse {
+    repeated Story story = 1;
+}
+
 // The Vocabulary service definition.
 service VocabularyService {
     // add a new vocabulary
     rpc AddVocabulary(AddVocabularyRequest) returns (VocabularyResponse) {}
     // query vocabulary
     rpc QueryVocabulary(QueryVocabularyRequest) returns (QueryVocabularyResponse) {}
+    // query random vocabulary
+    rpc QueryVocabularyRandom(QueryVocabularyRandomRequest) returns (QueryVocabularyResponse) {}
+
+}
+
+service StoryService {
+    // add a new story
+    rpc AddStory(AddStoryRequest) returns (StoryResponse) {}
 }

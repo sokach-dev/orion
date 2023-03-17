@@ -37,4 +37,21 @@ impl VocabularyService for OrionService {
             vocabulary: v,
         }))
     }
+
+    async fn query_vocabulary_random(
+        &self,
+        request: Request<abi::QueryVocabularyRandomRequest>,
+    ) -> Result<Response<abi::QueryVocabularyResponse>, Status> {
+        let req = request.into_inner();
+
+        if req.limit < 0 {
+            return Err(Status::invalid_argument("missing query parameters"));
+        }
+
+        let v = self.model.get_random_vocabularys(req.limit).await?;
+
+        Ok(Response::new(abi::QueryVocabularyResponse {
+            vocabulary: v,
+        }))
+    }
 }

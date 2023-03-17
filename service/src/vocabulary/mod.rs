@@ -5,13 +5,16 @@ use tonic::async_trait;
 #[async_trait]
 pub trait VocabularyTrait {
     /// make a vocabulary
-    async fn add_vocabulary(&self, v: abi::Vocabulary) -> Result<abi::Vocabulary, abi::Error>;
+    async fn add_vocabulary(&self, mut v: abi::Vocabulary) -> Result<abi::Vocabulary, abi::Error>;
 
     /// get a vocabulary
     async fn get_vocabulary(
         &self,
         q: abi::VocabularyQuery,
     ) -> Result<Vec<abi::Vocabulary>, abi::Error>;
+
+    /// get random vocabularys limit amount
+    async fn get_random_vocabularys(&self, limit: i64) -> Result<Vec<abi::Vocabulary>, abi::Error>;
 }
 
 #[async_trait]
@@ -50,6 +53,15 @@ impl VocabularyTrait for ModelService {
         let sql = format!("SELECT * FROM vocabulary {}", condition);
         println!("condition: {}", sql);
 
+        let result: Vec<abi::Vocabulary> = sqlx::query_as(&sql).fetch_all(&self.pool).await?;
+
+        Ok(result)
+    }
+
+    // get random vocabularys limit amount
+    async fn get_random_vocabularys(&self, limit: i64) -> Result<Vec<abi::Vocabulary>, abi::Error> {
+        let sql = format!("SELECT * FROM vocabulary ORDER BY RANDOM() LIMIT {}", limit);
+        tracing::debug!("get random vocabulary: {}", sql);
         let result: Vec<abi::Vocabulary> = sqlx::query_as(&sql).fetch_all(&self.pool).await?;
 
         Ok(result)

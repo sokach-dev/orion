@@ -1,3 +1,6 @@
+mod story;
+
+use abi::story_service_client::StoryServiceClient;
 use abi::vocabulary_service_client::VocabularyServiceClient;
 use abi::{QueryVocabularyRequest, VocabularyQuery};
 use anyhow::anyhow;
@@ -12,8 +15,8 @@ pub struct OpenAI {
     pub rpc: String,
     pub key: String,
     pub openai_url: String,
-    pub word_list_file: String,
     pub prompt: String,
+    pub concurrence_amount: usize,
 }
 
 async fn add_word_to_db(
@@ -85,36 +88,40 @@ impl OpenAI {
         rpc_server: String,
         key: String,
         openai_url: String,
-        word_list_file: String,
         prompt: String,
     ) -> Result<Self, Box<dyn std::error::Error>> {
+        let concurrence_num_str =
+            std::env::var("OPENAI_CONCURRENCE_NUM").unwrap_or("1".to_string());
+        let concurrence_amount = concurrence_num_str.parse::<usize>().unwrap_or(1);
+
         Ok(Self {
             rpc: rpc_server,
             key,
             openai_url,
-            word_list_file,
             prompt,
+            concurrence_amount,
         })
     }
 
-    async fn get_client(&self) -> Result<VocabularyServiceClient<Channel>, abi::Error> {
+    async fn get_vocabulary_client(&self) -> Result<VocabularyServiceClient<Channel>, abi::Error> {
         let rpc = VocabularyServiceClient::connect(self.rpc.clone()).await?;
+        Ok(rpc)
+    }
+    async fn get_story_client(&self) -> Result<StoryServiceClient<Channel>, abi::Error> {
+        let rpc = StoryServiceClient::connect(self.rpc.clone()).await?;
         Ok(rpc)
     }
 
     /// Add words to the database from word list file.
-    pub async fn add_word_from_file(&self) -> Result<(), abi::Error> {
+    pub async fn add_word_from_file(&self, word_list_file: String) -> Result<(), abi::Error> {
         // get word list from file and split it by new line
-        let word_list = fs::read_to_string(self.word_list_file.as_str())?;
+        let word_list = fs::read_to_string(word_list_file.as_str())?;
         let word_list = word_list
             .split('\n')
             .map(|s| s.into())
             .collect::<Vec<String>>();
 
-        let concurrence_num_str =
-            std::env::var("OPENAI_CONCURRENCE_NUM").unwrap_or("2".to_string());
-        let num = concurrence_num_str.parse::<usize>().unwrap_or(2);
-        let (s, r) = bounded(num); // openai request limit 20/min
+        let (s, r) = bounded(self.concurrence_amount); // openai request limit 20/min
 
         let wg = WaitGroup::new();
 
@@ -128,7 +135,7 @@ impl OpenAI {
             });
 
             let response = self
-                .get_client()
+                .get_vocabulary_client()
                 .await?
                 .query_vocabulary(request)
                 .await?
@@ -145,7 +152,7 @@ impl OpenAI {
                 let openai_url = self.openai_url.clone();
                 let key = self.key.clone();
                 let prompt = self.prompt.clone();
-                let rpc = self.get_client().await?;
+                let rpc = self.get_vocabulary_client().await?;
                 tokio::spawn(async move {
                     tracing::info!("will add word: {}", w);
                     match add_word_to_db(rr, wg, w.clone(), openai_url, key, prompt, rpc).await {
