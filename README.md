@@ -36,8 +36,8 @@ RUST_LOG=info ./target/debug/orion rpc -c rpc.toml
 ## 进度
 
 ### abi
-- [ ] 提供配置解析能力
-- [ ] 提供proto文件解析能力
+- [x] 提供配置解析能力
+- [x] 提供proto文件解析能力
 
 ### service
 - [x] 对orion.vocabulary表的增删查改
