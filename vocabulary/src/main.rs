@@ -129,7 +129,7 @@ fn check_params(
 ) -> Result<(String, String, String)> {
     let key = key
         .clone()
-        .unwrap_or_else(|| env::var("OPENAI_KEY").unwrap());
+        .unwrap_or_else(|| env::var("OPENAI_KEY").expect("need key for openai"));
 
     let url = url.clone().unwrap_or_else(|| {
         env::var("OPENAI_URL")
@@ -138,7 +138,7 @@ fn check_params(
 
     let rpc_server = rpc_server
         .clone()
-        .unwrap_or_else(|| env::var("VOCABULARY_RPC_SERVER").unwrap());
+        .unwrap_or_else(|| env::var("ORION_RPC_SERVER").expect("need rpc server"));
 
     Ok((key, url, rpc_server))
 }
