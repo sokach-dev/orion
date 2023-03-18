@@ -2,8 +2,8 @@ mod rpc;
 pub mod story;
 pub mod vocabulary;
 
-use abi::vocabulary_service_server::VocabularyServiceServer;
 use abi::story_service_server::StoryServiceServer;
+use abi::vocabulary_service_server::VocabularyServiceServer;
 use sqlx::PgPool;
 
 #[derive(Debug, Clone)]

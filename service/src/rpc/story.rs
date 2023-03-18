@@ -1,6 +1,6 @@
+use crate::{story::StoryTrait, OrionService};
 use abi::story_service_server::StoryService;
 use tonic::{async_trait, Request, Response, Status};
-use crate::{story::StoryTrait, OrionService};
 
 #[async_trait]
 impl StoryService for OrionService {
