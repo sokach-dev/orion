@@ -42,6 +42,9 @@ enum Commands {
         /// generate a story with how many word, commend 5.
         #[clap(short, long)]
         word_amount: i64,
+        /// total need how many story
+        #[clap(short, long)]
+        total_generate_amount: u32,
         /// prompt
         #[clap(short, long)]
         prompt: Option<String>,
@@ -96,6 +99,7 @@ async fn main() {
             key,
             url,
             word_amount,
+            total_generate_amount,
             prompt,
             rpc_server,
         } => {
@@ -106,19 +110,20 @@ async fn main() {
                 .clone()
                 .unwrap_or_else(|| "使用这些单词用英语讲一个小故事".to_string());
 
-            let word_amount = *word_amount;
-
-            let total_generate_amount = env::var("TOTAL_GENERATE_AMOUNT")
-                .unwrap_or_else(|_| "5".to_string())
-                .parse::<u32>()
-                .unwrap();
+            if *total_generate_amount < 1 || *word_amount < 1 {
+                panic!("give right total_generate_amount or word_amount");
+            }
 
             let op = openai::OpenAI::new(rpc_server, key, url, prompt)
                 .await
                 .unwrap();
-            op.generate_story_with_words(word_amount, total_generate_amount)
+
+            op.generate_story_with_words(*word_amount, *total_generate_amount)
                 .await
                 .unwrap();
+
+            tracing::info!("story task over!");
+            std::future::pending::<()>().await;
         }
     }
 }

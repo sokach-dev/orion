@@ -3,6 +3,7 @@ pub mod story;
 pub mod vocabulary;
 
 use abi::vocabulary_service_server::VocabularyServiceServer;
+use abi::story_service_server::StoryServiceServer;
 use sqlx::PgPool;
 
 #[derive(Debug, Clone)]
@@ -40,12 +41,14 @@ pub async fn start_server(config: &abi::Config) -> Result<(), Box<dyn std::error
     let addr: std::net::SocketAddr = format!("{}:{}", config.host, config.port).parse()?;
 
     let svc = OrionService::from_config(&config.db_config).await?;
-    let svc = VocabularyServiceServer::new(svc);
+    let vocabulary_svc = VocabularyServiceServer::new(svc.clone());
+    let story_svc = StoryServiceServer::new(svc.clone());
 
     tracing::info!("Listening on {}", addr);
 
     tonic::transport::Server::builder()
-        .add_service(svc)
+        .add_service(vocabulary_svc)
+        .add_service(story_svc)
         .serve(addr)
         .await?;
     Ok(())
