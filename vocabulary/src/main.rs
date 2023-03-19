@@ -108,7 +108,7 @@ async fn main() {
 
             let prompt = prompt
                 .clone()
-                .unwrap_or_else(|| "使用这些单词用英语讲一个小故事".to_string());
+                .unwrap_or_else(|| "请使用这些单词用英语讲一个小故事，且给出翻译并用括号包裹".to_string());
 
             if *total_generate_amount < 1 || *word_amount < 1 {
                 panic!("give right total_generate_amount or word_amount");
