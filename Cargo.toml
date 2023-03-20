@@ -2,7 +2,6 @@
 members = [
     "abi",
     "service",
-    "tui",
     "vocabulary",
     "openai",
 ]

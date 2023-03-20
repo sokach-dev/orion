@@ -48,6 +48,3 @@ RUST_LOG=info ./target/debug/orion rpc -c rpc.toml
 
 ### vocabulary
 - [x] 通过openai添加新单词
-
-### tui
-- [ ] 基本的查询能力
