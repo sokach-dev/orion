@@ -12,4 +12,4 @@ CREATE TABLE IF NOT EXISTS orion.word_list (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX orion_word_list_idx ON orion.word_list (classification);
+CREATE INDEX IF NOT EXISTS orion_word_list_idx ON orion.word_list (classification);

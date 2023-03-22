@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS orion.vocabulary (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX orion_word_idx ON orion.vocabulary (word);
+CREATE UNIQUE INDEX IF NOT EXISTS orion_word_idx ON orion.vocabulary (word);
